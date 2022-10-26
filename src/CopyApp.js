@@ -5,27 +5,36 @@ import List from './components/list/List';
 function App() {
   const [name, setName] = useState('');
   const [list, setList] = useState([]);
-  const [editId, setEditId] = useState(-1);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editId, setEditId] = useState();
   const handleSubmit = e => {
     e.preventDefault();
-    if (editId === -1) {
+    if (!isEditing) {
       const id = Math.random();
       setList([...list, { title: name, id: id }]);
       setName('');
     } else {
-      const temp = [...list];
-      temp[editId].title = name;
-      setList(temp);
-      setEditId(-1);
+      setList(
+        list.map(item => {
+          if (item.id === editId) {
+            return { ...item, title: name };
+          }
+          return item;
+        })
+      );
+      setIsEditing(false);
+      setEditId();
       setName('');
     }
   };
   const handleDelete = id => {
     setList(list.filter(item => item.id !== id));
   };
-  const handleEdit = index => {
-    setEditId(index);
-    setName(list[index].title);
+  const handleEdit = id => {
+    const specificItem = list.find(item => item.id === id);
+    setIsEditing(true);
+    setEditId(specificItem.id);
+    setName(specificItem.title);
   };
 
   return (
@@ -41,7 +50,7 @@ function App() {
             onChange={e => setName(e.target.value)}
           />
           <button type="submit" className="submit-btn">
-            {editId >= 0 ? 'Edit' : 'Submit'}
+            {isEditing ? 'Edit' : 'Submit'}
           </button>
         </div>
       </form>
